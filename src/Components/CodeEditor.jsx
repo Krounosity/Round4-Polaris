@@ -1,35 +1,26 @@
-
-
-import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom"; 
+import React, { useRef, useState, useEffect } from "react";
 import CodeMirror from "@uiw/react-codemirror";
 import { cpp } from "@codemirror/lang-cpp";
 import { oneDark } from "@codemirror/theme-one-dark";
-import { doc, updateDoc, increment } from "firebase/firestore"; 
-import { getDatabase, ref, onValue } from "firebase/database";
-import { useFirebase } from "../firebase"; 
+import { useNavigate } from "react-router-dom";
+import { getDatabase, ref, set, update } from "firebase/database";
+import { useFirebase } from "../firebase"; // assuming you have a custom firebase hook
+import { get } from "firebase/database";
 
-const CodeEditor = ({ teacherCode }) => {
-  const firebase = useFirebase(); 
-  const navigate = useNavigate(); 
-  const [code, setCode] = useState("#include<stdio.h>\nint main() {\n    printf(\"Hello, World!\\n\");\n    return 0;\n}");
+const CodeEditor = ({ lightState, userCode, onCodeChange, teacherCode }) => {
   const [output, setOutput] = useState("");
   const [evaluationResult, setEvaluationResult] = useState("");
-  const [lightState, setLightState] = useState("green");
+  const navigate = useNavigate();
+  const firebase = useFirebase(); 
+  const initialBoilerplate = `#include<stdio.h>\nint main() {\n    printf("Hello, World!\\n");\n    return 0;\n}`;
+
+  const codeRef = useRef(userCode || initialBoilerplate);
 
   useEffect(() => {
-    // Set up listener for light state
-    const db = getDatabase(firebase.app);
-    const lightRef = ref(db, 'lightState');
-    const unsubscribe = onValue(lightRef, (snapshot) => {
-      const data = snapshot.val();
-      if (data) {
-        setLightState(data.current);
-      }
-    });
-
-    return () => unsubscribe();
-  }, [firebase.app]);
+    if (userCode) {
+      codeRef.current = userCode;
+    }
+  }, [userCode]);
 
   const handleRunCode = async () => {
     if (lightState === "red") {
@@ -43,7 +34,7 @@ const CodeEditor = ({ teacherCode }) => {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ code }),
+        body: JSON.stringify({ code: codeRef.current }),
       });
 
       if (!response.ok) {
@@ -62,7 +53,7 @@ const CodeEditor = ({ teacherCode }) => {
       setEvaluationResult("Cannot submit code during red light!");
       return;
     }
-
+  
     try {
       const response = await fetch("http://127.0.0.1:8000/evaluate/", {
         method: "POST",
@@ -71,7 +62,7 @@ const CodeEditor = ({ teacherCode }) => {
         },
         body: JSON.stringify({
           teacher_code: teacherCode,
-          student_code: code,
+          student_code: codeRef.current,
         }),
       });
   
@@ -85,141 +76,128 @@ const CodeEditor = ({ teacherCode }) => {
       const scoreMatch = result.result.match(/Score:\s(\d+)/);
       const score = scoreMatch ? parseInt(scoreMatch[1], 10) : 0;
   
+      // Update Firebase Realtime Database with the score
+      const db = getDatabase();
       if (firebase.user) {
-        const teamDocRef = doc(firebase.firestore, "Teams", firebase.user.uid);
-        await updateDoc(teamDocRef, {
-          round4: score, 
-          overall: increment(score),
+        const userScoreRef = ref(db, "scores/" + firebase.user.uid);
+        await set(userScoreRef, {
+          score: score,
+          timestamp: new Date().toISOString(),
         });
   
-        const backendResponse = await fetch("http://127.0.0.1:8000/save-score/", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            userId: firebase.user.uid, 
-            score: score, 
-            round: "round4", 
-          }),
-        });
+        // Get the team data
+        const teamRef = ref(db, "teams/" + firebase.user.uid); // assuming 'teams' is the collection
+        const teamSnapshot = await get(teamRef); // Use 'get' to fetch the data
   
-        if (!backendResponse.ok) {
-          throw new Error(`Failed to send score to backend! Status: ${backendResponse.status}`);
+        if (teamSnapshot.exists()) {
+          const teamData = teamSnapshot.val();
+          const round4 = teamData.round4 || 0;
+          const overall = teamData.overall || 0;
+  
+          
+          await update(teamRef, {
+            round4: round4 + score, // Add the score to round4
+            overall: overall + score, // Add the score to overall
+          });
+  
+         
+          setTimeout(() => {
+            alert(`Your score is: ${score}`);
+            navigate("/");
+          }, 5000);
+        } else {
+          console.error("Team data not found.");
         }
-  
-        const backendResult = await backendResponse.json();
-        console.log("Score sent to backend:", backendResult);
-  
-        alert(`Your score is: ${score}`);
-        navigate("/");
       }
     } catch (error) {
       setEvaluationResult(`Error: ${error.message}`);
-      console.error("Error updating Firestore or sending to backend:", error);
+      console.error("Error updating Firebase:", error);
     }
   };
+  console.log("Get This error if required ")
 
   return (
-    <div style={{ padding: "20px", position: "relative" }}>
-      {/* Light state indicator */}
-      <div
-        style={{
-          position: "absolute",
-          top: 0,
-          left: 0,
-          right: 0,
-          padding: "10px",
-          backgroundColor: lightState === "red" ? "#ffebee" : "#e8f5e9",
-          textAlign: "center",
-          fontWeight: "bold",
-          color: lightState === "red" ? "#d32f2f" : "#2e7d32",
-          transition: "all 0.3s ease",
-          zIndex: 1000,
+    <div style={{ padding: "20px", maxWidth: "800px", margin: "0 auto" }}>
+      <CodeMirror
+        value={codeRef.current}
+        height="400px"
+        theme={oneDark}
+        extensions={[cpp()]}
+        onChange={(value) => {
+          codeRef.current = value;
+          if (onCodeChange) {
+            onCodeChange(value); 
+          }
         }}
-      >
-        {lightState === "red" ? "🔴 STOP CODING!" : "🟢 CODE AWAY!"}
+      />
+      <div style={{ display: "flex", gap: "10px", marginTop: "20px" }}>
+        <button
+          style={{
+            padding: "10px 20px",
+            backgroundColor: "#007bff",
+            color: "white",
+            border: "none",
+            borderRadius: "4px",
+            cursor: "pointer",
+          }}
+          onClick={handleRunCode}
+        >
+          Run Code
+        </button>
+        <button
+          style={{
+            padding: "10px 20px",
+            backgroundColor: "#28a745",
+            color: "white",
+            border: "none",
+            borderRadius: "4px",
+            cursor: "pointer",
+          }}
+          onClick={handleSubmitCode}
+        >
+          Submit Code
+        </button>
       </div>
-
-      <div style={{ marginTop: "40px" }}>
-        <h2>C Code Editor</h2>
-        <div style={{ position: "relative" }}>
-          <CodeMirror
-            value={code}
-            height="200px"
-            theme={oneDark}
-            extensions={[cpp()]}
-            onChange={(value) => lightState === "green" ? setCode(value) : null}
-            editable={lightState === "green"}
+      {output && (
+        <div style={{ marginTop: "20px", color: "#333", fontSize: "16px" }}>
+          <strong>Output:</strong>
+          <pre
             style={{
-              opacity: lightState === "red" ? 0.7 : 1,
-              transition: "opacity 0.3s ease",
-            }}
-          />
-          {lightState === "red" && (
-            <div
-              style={{
-                position: "absolute",
-                top: 0,
-                left: 0,
-                right: 0,
-                bottom: 0,
-                backgroundColor: "rgba(255, 0, 0, 0.1)",
-                pointerEvents: "none",
-              }}
-            />
-          )}
-        </div>
-
-        <div style={{ display: "flex", gap: "10px", marginTop: "10px" }}>
-          <button
-            style={{
-              padding: "10px 20px",
-              backgroundColor: lightState === "red" ? "#ccc" : "#007BFF",
-              color: "#fff",
-              border: "none",
+              backgroundColor: "#f5f5f5",
+              padding: "10px",
               borderRadius: "5px",
-              cursor: lightState === "red" ? "not-allowed" : "pointer",
-              transition: "background-color 0.3s ease",
+              whiteSpace: "pre-wrap",
+              wordWrap: "break-word",
             }}
-            onClick={handleRunCode}
-            disabled={lightState === "red"}
           >
-            Run Code
-          </button>
-
-          <button
-            style={{
-              padding: "10px 20px",
-              backgroundColor: lightState === "red" ? "#ccc" : "#28a745",
-              color: "#fff",
-              border: "none",
-              borderRadius: "5px",
-              cursor: lightState === "red" ? "not-allowed" : "pointer",
-              transition: "background-color 0.3s ease",
-            }}
-            onClick={handleSubmitCode}
-            disabled={lightState === "red"}
-          >
-            Submit Code
-          </button>
+            {output || "No output"}
+          </pre>
         </div>
-
-        <h3>Output:</h3>
-        <pre style={{ backgroundColor: "#f5f5f5", padding: "10px", borderRadius: "5px" }}>
-          {output || "No output"}
-        </pre>
-
-        <h3>Evaluation Result:</h3>
-        <pre style={{ backgroundColor: "#f5f5f5", padding: "10px", borderRadius: "5px" }}>
-          {evaluationResult || "No evaluation result"}
-        </pre>
-      </div>
+      )}
+      {evaluationResult && (
+        <div style={{ marginTop: "10px", color: "#333", fontSize: "16px" }}>
+          <strong>Evaluation Result:</strong>
+          <pre
+            style={{
+              backgroundColor: "#f5f5f5",
+              padding: "10px",
+              borderRadius: "5px",
+              whiteSpace: "pre-wrap",
+              wordWrap: "break-word",
+            }}
+          >
+            {evaluationResult || "No evaluation result"}
+          </pre>
+        </div>
+      )}
     </div>
   );
 };
 
 export default CodeEditor;
+
+
+
 
 // import React, { useState } from "react";
 // import { useNavigate } from "react-router-dom"; 

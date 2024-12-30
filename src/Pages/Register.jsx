@@ -1,27 +1,78 @@
 import React, { useState } from 'react';
+import { getDatabase, ref, set, get, child } from 'firebase/database';
 import { useFirebase } from '../firebase';
 import { useNavigate, Link } from 'react-router-dom';
 
 function Register() {
     const [teamName, setTeamName] = useState('');
     const [leaderEmail, setLeaderEmail] = useState('');
-    const [members, setMembers] = useState(['', '', '', '']);
+    const [leaderName, setLeaderName] = useState('');
+    const [members, setMembers] = useState([
+        { name: '', email: '' },
+        { name: '', email: '' },
+        { name: '', email: '' },
+    ]);
     const firebase = useFirebase();
     const navigate = useNavigate();
 
+    async function validateTeam() {
+        const db = getDatabase();
+        const dbRef = ref(db);
+
+        
+        const teamsSnapshot = await get(child(dbRef, `teams`));
+        if (teamsSnapshot.exists()) {
+            const teams = teamsSnapshot.val();
+            for (const teamId in teams) {
+                const team = teams[teamId];
+                if (team.teamName.toLowerCase() === teamName.toLowerCase()) {
+                    return { valid: false, message: 'Team name already exists.' };
+                }
+
+                // Check for duplicate team members (name and email)
+                const allMembers = [team.leaderEmail, ...team.members.map((m) => m.email)];
+                const currentEmails = [leaderEmail, ...members.map((m) => m.email)];
+                for (const email of currentEmails) {
+                    if (allMembers.includes(email)) {
+                        return { valid: false, message: `Duplicate email found: ${email}` };
+                    }
+                }
+                const allNames = [team.leaderName, ...team.members.map((m) => m.name)];
+                const currentNames = [leaderName, ...members.map((m) => m.name)];
+                for (const name of currentNames) {
+                    if (allNames.includes(name)) {
+                        return { valid: false, message: `Duplicate name found: ${name}` };
+                    }
+                }
+            }
+        }
+        return { valid: true };
+    }
+
     async function handleCreate(event) {
         event.preventDefault();
+
+        if (!teamName || !leaderName || !leaderEmail) {
+            alert('Please fill in all required fields.');
+            return;
+        }
+
+        const validation = await validateTeam();
+        if (!validation.valid) {
+            alert(validation.message);
+            return;
+        }
+
         const password = teamName;
 
         try {
-           
             const userCredential = await firebase.signUpUser(leaderEmail, password);
             const user = userCredential.user;
 
-            // Prepare the team data
             const teamData = {
                 teamName,
                 leaderEmail,
+                leaderName,
                 members,
                 uid: user.uid,
                 round1: 0,
@@ -29,22 +80,15 @@ function Register() {
                 round3: 0,
                 round4: 0,
                 overall: 0,
+                isQ1: false,
+                isQ2: false,
+                isQ3: false,
+                isQ4: false,
             };
 
-        
-            const apiURL = `https://polaris-5c2b4-default-rtdb.firebaseio.com/teams/${user.uid}.json`;
-
-            const response = await fetch(apiURL, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(teamData),
-            });
-
-            if (!response.ok) {
-                throw new Error('Failed to save team data to Realtime Database');
-            }
+            const db = getDatabase();
+            const dbRef = ref(db, `teams/${user.uid}`);
+            await set(dbRef, teamData);
 
             alert('Team Registered Successfully!');
             navigate('/');
@@ -93,6 +137,20 @@ function Register() {
                         }}
                     />
                     <input
+                        type="text"
+                        placeholder="Leader's Name"
+                        value={leaderName}
+                        onChange={(e) => setLeaderName(e.target.value)}
+                        required
+                        style={{
+                            width: '100%',
+                            padding: '10px',
+                            marginBottom: '15px',
+                            borderRadius: '5px',
+                            border: '1px solid #ccc',
+                        }}
+                    />
+                    <input
                         type="email"
                         placeholder="Leader's Email"
                         value={leaderEmail}
@@ -107,26 +165,46 @@ function Register() {
                         }}
                     />
                     {members.map((member, index) => (
-                        <input
-                            key={index}
-                            type="text"
-                            placeholder={`Member ${index + 1}`}
-                            value={member}
-                            onChange={(e) =>
-                                setMembers((prev) => {
-                                    const newMembers = [...prev];
-                                    newMembers[index] = e.target.value;
-                                    return newMembers;
-                                })
-                            }
-                            style={{
-                                width: '100%',
-                                padding: '10px',
-                                marginBottom: '15px',
-                                borderRadius: '5px',
-                                border: '1px solid #ccc',
-                            }}
-                        />
+                        <div key={index}>
+                            <input
+                                type="text"
+                                placeholder={`Member ${index + 1} Name`}
+                                value={member.name}
+                                onChange={(e) =>
+                                    setMembers((prev) => {
+                                        const newMembers = [...prev];
+                                        newMembers[index].name = e.target.value;
+                                        return newMembers;
+                                    })
+                                }
+                                style={{
+                                    width: '100%',
+                                    padding: '10px',
+                                    marginBottom: '10px',
+                                    borderRadius: '5px',
+                                    border: '1px solid #ccc',
+                                }}
+                            />
+                            <input
+                                type="email"
+                                placeholder={`Member ${index + 1} Email`}
+                                value={member.email}
+                                onChange={(e) =>
+                                    setMembers((prev) => {
+                                        const newMembers = [...prev];
+                                        newMembers[index].email = e.target.value;
+                                        return newMembers;
+                                    })
+                                }
+                                style={{
+                                    width: '100%',
+                                    padding: '10px',
+                                    marginBottom: '15px',
+                                    borderRadius: '5px',
+                                    border: '1px solid #ccc',
+                                }}
+                            />
+                        </div>
                     ))}
                     <button
                         type="submit"

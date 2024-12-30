@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { getDatabase, ref, push } from "firebase/database";
+import { getDatabase, ref, set } from "firebase/database";
 
 export default function AddQuestion() {
   const [questionNo, setQuestionNo] = useState("");
@@ -23,9 +23,10 @@ export default function AddQuestion() {
 
     try {
       setSubmitting(true);
-      const db = getDatabase(undefined, "https://polaris-5c2b4-default-rtdb.firebaseio.com/");
-      const questionsRef = ref(db, "Question4");
-      await push(questionsRef, {
+
+      const db = getDatabase();
+      const questionRef = ref(db, `Question4/${questionNo}`);
+      set(questionRef, {
         questionNo: Number(questionNo),
         name,
         solution,
@@ -103,7 +104,9 @@ export default function AddQuestion() {
       <h2 style={titleStyle}>Add Question Here</h2>
       <form onSubmit={handleSubmit} style={formStyle}>
         <div style={formGroupStyle}>
-          <label style={labelStyle} htmlFor="questionNo">Question Number:</label>
+          <label style={labelStyle} htmlFor="questionNo">
+            Question Number:
+          </label>
           <input
             type="number"
             id="questionNo"
@@ -114,7 +117,9 @@ export default function AddQuestion() {
           />
         </div>
         <div style={formGroupStyle}>
-          <label style={labelStyle} htmlFor="name">Question Name:</label>
+          <label style={labelStyle} htmlFor="name">
+            Question Name:
+          </label>
           <input
             type="text"
             id="name"
@@ -125,7 +130,9 @@ export default function AddQuestion() {
           />
         </div>
         <div style={formGroupStyle}>
-          <label style={labelStyle} htmlFor="question">Question Text:</label>
+          <label style={labelStyle} htmlFor="question">
+            Question Text:
+          </label>
           <textarea
             id="question"
             value={question}
@@ -135,7 +142,9 @@ export default function AddQuestion() {
           ></textarea>
         </div>
         <div style={formGroupStyle}>
-          <label style={labelStyle} htmlFor="solution">Solution:</label>
+          <label style={labelStyle} htmlFor="solution">
+            Solution:
+          </label>
           <textarea
             id="solution"
             value={solution}

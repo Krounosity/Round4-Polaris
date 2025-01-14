@@ -13,14 +13,13 @@ function Card({ name, id, isActive }) {
     };
 
     return (
-        <div className="relative w-64 p-4 mx-auto my-4 text-center text-white border-4 border-dashed rounded-lg shadow-lg font-sans bg-white/10 backdrop-blur overflow-hidden">
-            {/* Glowing Border Effect */}
+        <div className="relative w-64 h-52 p-4 mx-auto my-4 text-center text-white border-4 border-dashed rounded-lg shadow-lg font-sans bg-white/10 backdrop-blur overflow-hidden">
             <div className="absolute inset-0 rounded-lg border-[2px] border-transparent pointer-events-none before:absolute before:inset-0 before:border-[2px] before:rounded-lg before:border-white before:opacity-50 before:blur-md"></div>
             <div className="absolute inset-0 rounded-lg border-[2px] border-transparent pointer-events-none after:absolute after:inset-0 after:border-[2px] after:rounded-lg after:border-white/30 after:animate-pulse"></div>
             
             <h3 className="mb-3 text-lg">{name}</h3>
             <button
-                className="px-4 py-2 text-sm bg-teal-800 border-none rounded shadow-lg cursor-pointer transition-transform duration-200 hover:bg-blue-800 hover:scale-105"
+                className="px-4 py-2 text-sm bg-[#E5205E] border-none rounded shadow-lg cursor-pointer transition-transform duration-200 hover:bg-[#C41D4E] hover:scale-105"
                 onClick={handleViewClick}
             >
                 View

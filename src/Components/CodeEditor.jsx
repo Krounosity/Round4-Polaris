@@ -126,7 +126,7 @@ const CodeEditor = ({ lightState, userCode, onCodeChange, teacherCode }) => {
           }}
           style={{
             height: "100vh",
-            width: "100%",
+            width: "80%",
             fontSize: "18px",
           }}
         />

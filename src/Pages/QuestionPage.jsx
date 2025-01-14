@@ -64,15 +64,15 @@ function QuestionPage() {
     };
 
     if (error) {
-        return <div className={`min-h-screen ${lightState === 'red' ? 'bg-red-700' : 'bg-gradient-to-b from-[#004d60] to-black'} transition-colors duration-500 p-5 text-white`}>{error}</div>;
+        return <div className={`min-h-screen ${lightState === 'red' ? 'bg-red-700' : 'bg-black'} transition-colors duration-500 p-5 text-white`}>{error}</div>;
     }
 
     if (!questionData) {
-        return <div className={`min-h-screen ${lightState === 'red' ? 'bg-red-700' : 'bg-gradient-to-b from-[#004d60] to-black'} transition-colors duration-500 p-5 text-white`}>Loading...</div>;
+        return <div className={`min-h-screen ${lightState === 'red' ? 'bg-red-700' : 'bg-black'} transition-colors duration-500 p-5 text-white`}>Loading...</div>;
     }
 
     return (
-        <div className={`min-h-screen ${lightState === 'red' ? 'bg-red-700' : 'bg-gradient-to-b from-[#004d60] to-black'} transition-colors duration-500 p-5 text-white`}>
+        <div className={`min-h-screen ${lightState === 'red' ? 'bg-red-700' : 'bg-black'} transition-colors duration-500 p-5 text-white`}>
             {lightState === 'red' && (
                 <div className="fixed inset-0 bg-red-700 text-white flex justify-center items-center text-2xl font-bold z-50">
                     🔴 RED LIGHT - STOP CODING!
@@ -85,7 +85,7 @@ function QuestionPage() {
                         {questionData.name}
                     </h2>
 
-                    <div className="p-4 text-black rounded-md mb-5 border bg-[#d2b48c] border-black">
+                    <div className="p-4 text-black rounded-md mb-5 border bg-[#E5205E] border-black">
                         <p>{questionData.question}</p>
                     </div>
 
@@ -176,15 +176,15 @@ export default QuestionPage;
 //     };
 
 //     if (error) {
-//         return <div className={`min-h-screen ${lightState === 'red' ? 'bg-red-700' : 'bg-gradient-to-b from-[#004d60] to-black'} transition-colors duration-500 p-5 text-white`}>{error}</div>;
+//         return <div className={`min-h-screen ${lightState === 'red' ? 'bg-red-700' : 'bg-black'} transition-colors duration-500 p-5 text-white`}>{error}</div>;
 //     }
 
 //     if (!questionData) {
-//         return <div className={`min-h-screen ${lightState === 'red' ? 'bg-red-700' : 'bg-gradient-to-b from-[#004d60] to-black'} transition-colors duration-500 p-5 text-white`}>Loading...</div>;
+//         return <div className={`min-h-screen ${lightState === 'red' ? 'bg-red-700' : 'bg-black'} transition-colors duration-500 p-5 text-white`}>Loading...</div>;
 //     }
 
 //     return (
-//         <div className={`min-h-screen ${lightState === 'red' ? 'bg-red-700' : 'bg-gradient-to-b from-[#004d60] to-black'} transition-colors duration-500 p-5 text-white`}>
+//         <div className={`min-h-screen ${lightState === 'red' ? 'bg-red-700' : 'bg-black'} transition-colors duration-500 p-5 text-white`}>
 //             {lightState === 'red' && (
 //                 <div className="fixed inset-0 bg-red-700 text-white flex justify-center items-center text-2xl font-bold z-50">
 //                     🔴 RED LIGHT - STOP CODING!

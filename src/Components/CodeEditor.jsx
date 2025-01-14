@@ -111,8 +111,8 @@ const CodeEditor = ({ lightState, userCode, onCodeChange, teacherCode }) => {
   };
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", height: "100%", padding: "10px", boxSizing: "border-box" }}>
-      <div style={{ flex: "1", overflow: "hidden" }}>
+    <div style={{ display: "flex", flexDirection: "column", height: "100%", width: "100%", padding: "10px", boxSizing: "border-box" , justifyContent: "center" }}>
+      <div style={{ flex: "1", overflow: "hidden", paddingLeft: "50px", paddingRight: "50px" }}>
         <CodeMirror
           value={codeRef.current}
           height="100%"
@@ -125,8 +125,7 @@ const CodeEditor = ({ lightState, userCode, onCodeChange, teacherCode }) => {
             }
           }}
           style={{
-            height: "100vh",
-            width: "80%",
+            height: "80vh",
             fontSize: "18px",
           }}
         />

@@ -80,12 +80,12 @@ function QuestionPage() {
             )}
 
             {lightState !== 'red' && (
-                <div className="mt-10 p-5 rounded-lg shadow-md" style={{ backgroundColor: 'rgba(255, 255, 255, 0.9)' }}>
+                <div className="mt-10 p-5 rounded-lg shadow-md" style={{ backgroundColor: 'rgba(255, 255, 255, 0.9)', paddingLeft: '30px', paddingRight: '30px' }}>
                     <h2 className={`text-2xl mb-2 font-bold ${lightState === 'red' ? 'text-red-700' : 'text-black'} transition-colors duration-500`}>
                         {questionData.name}
                     </h2>
 
-                    <div className="p-4 text-black rounded-md mb-5 border bg-[#E5205E] border-black">
+                    <div className="p-4 text-black rounded-md mb-5 border bg-[#ff82a9] border-black">
                         <p>{questionData.question}</p>
                     </div>
 

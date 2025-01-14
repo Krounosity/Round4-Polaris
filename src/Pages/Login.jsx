@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useFirebase } from '../firebase';
 import { useNavigate } from 'react-router-dom';
+import logimg from '../images/file.png'
 
 function Login() {
     const [teamName, setTeamName] = useState('');
@@ -28,75 +29,46 @@ function Login() {
 
     return (
         <div
-            style={{
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
-                minHeight: '100vh',
-                backgroundColor: '#f4f6f8',
-                padding: '20px',
-            }}
-        >
-            <div
-                style={{
-                    maxWidth: '400px',
-                    width: '100%',
-                    boxShadow: '0 4px 15px rgba(0, 0, 0, 0.2)',
-                    borderRadius: '10px',
-                    backgroundColor: '#fff',
-                    padding: '30px',
-                }}
-            >
-                <h3 style={{ textAlign: 'center', fontWeight: '700', color: '#007bff' }}>
-                    Team Login
-                </h3>
-                <form onSubmit={handleLogin}>
-                    <input
-                        type="text"
-                        placeholder="Team Name"
-                        value={teamName}
-                        onChange={(e) => setTeamName(e.target.value)}
-                        required
-                        style={{
-                            width: '100%',
-                            padding: '10px',
-                            marginBottom: '15px',
-                            borderRadius: '5px',
-                            border: '1px solid #ccc',
-                        }}
+        className='flex flex-col bg-gradient-to-b from-cyan-950 via-40%  via-black to-black  justify-center items-center relative 
+         min-h-screen '
+    >
+    <img src={logimg} alt="team-login" className="w-[50%] sm:w-[40%] md:w-[30%] lg:w-[20%]  absolute  object-contain mb-[14rem]    " />
+        <div
+           className="w-[50%] sm:w-[40%]  md:w-[30%] lg:w-[20%] shadow-lg rounded-lg  p-6 mt-[12rem] z-10 bg-black "
+           >
+            <h3 
+            className="text-center font-bold text-teal-500 text-xl mb-6">
+           
+                Team Login
+            </h3>
+            <form onSubmit={handleLogin}>
+                <input
+                    type="text"
+                    placeholder="Team Name"
+                    value={teamName}
+                    onChange={(e) => setTeamName(e.target.value)}
+                    required
+                    className="w-full p-2 mb-4 border border-teal-700 rounded-md bg-black text-white placeholder-gray-400 focus:outline-none   focus:border-teal-500 hover:border-teal-500"
+
                     />
-                    <input
-                        type="email"
-                        placeholder="Leader's Email"
-                        value={leaderEmail}
-                        onChange={(e) => setLeaderEmail(e.target.value)}
-                        required
-                        style={{
-                            width: '100%',
-                            padding: '10px',
-                            marginBottom: '15px',
-                            borderRadius: '5px',
-                            border: '1px solid #ccc',
-                        }}
-                    />
-                    <button
-                        type="submit"
-                        style={{
-                            width: '100%',
-                            padding: '10px',
-                            backgroundColor: '#007bff',
-                            color: '#fff',
-                            border: 'none',
-                            borderRadius: '5px',
-                            fontSize: '16px',
-                            cursor: 'pointer',
-                        }}
-                    >
-                        Login
-                    </button>
-                </form>
-            </div>
+                <input
+                    type="email"
+                    placeholder="Leader's Email"
+                    value={leaderEmail}
+                    onChange={(e) => setLeaderEmail(e.target.value)}
+                    required
+                    className="w-full p-2 mb-4 border border-teal-700 rounded-md bg-black text-white placeholder-gray-400 focus:outline-none   focus:border-teal-500 hover:border-teal-500"
+                   
+                />
+                <button
+                    type="submit"
+                    className="w-full p-2 bg-teal-700 text-white rounded-md mt-4 text-lg hover:bg-teal-400 transition font-semibold">
+                    Login
+                </button>
+            </form>
+                    
         </div>
+    </div>
     );
 }
 export default Login;

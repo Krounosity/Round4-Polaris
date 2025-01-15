@@ -8,12 +8,13 @@ const FirebaseConrext = createContext(null);
 export const useFirebase = () => useContext(FirebaseConrext);
 
 const firebaseConfig = {
-  apiKey: "AIzaSyBMCoGsLl3ikWB5s8M-2-LGxJCVvu_x4z0",
-  authDomain: "polaris-5c2b4.firebaseapp.com",
-  projectId: "polaris-5c2b4",
-  storageBucket: "polaris-5c2b4.firebasestorage.app",
-  messagingSenderId: "389360222826",
-  appId: "1:389360222826:web:99a14c0eb452d32a9b4013"
+    apiKey: "AIzaSyCORaJCN8cXUwwiuIsIpEcQnSVfqE8Kg5M",
+    authDomain: "r-gfg-86633.firebaseapp.com",
+    databaseURL: "https://r-gfg-86633-default-rtdb.firebaseio.com",
+    projectId: "r-gfg-86633",
+    storageBucket: "r-gfg-86633.appspot.com",
+    messagingSenderId: "1091682881949",
+    appId: "1:1091682881949:web:88d7409563cf42f2ccdf74"
 };
 
 export function FirebaseProvider(props) {
